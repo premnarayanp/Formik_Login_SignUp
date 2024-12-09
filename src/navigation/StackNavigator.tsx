@@ -1,19 +1,25 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
-import { Login, SignUp } from '../screens';
+import { Login, SignUp, Home } from '../screens';
+import { RootStackParamList } from "./types"
 
-export type RootStackParamList = {
-    SignUp: undefined;
-    Login: undefined;
-};
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const StackNavigator: React.FC = () => {
     return (
         <NavigationContainer>
-            <Stack.Navigator initialRouteName="SignUp">
+            <Stack.Navigator initialRouteName="Home">
+                <Stack.Screen
+                    name="Home"
+                    component={Home}
+                    options={{
+                        headerTitle: 'Home',
+                        headerTitleStyle: { fontSize: 20 },
+                    }}
+                />
+
                 <Stack.Screen
                     name="SignUp"
                     component={SignUp}
@@ -30,6 +36,7 @@ const StackNavigator: React.FC = () => {
                         headerTitleStyle: { fontSize: 20 },
                     }}
                 />
+
             </Stack.Navigator>
         </NavigationContainer>
     );

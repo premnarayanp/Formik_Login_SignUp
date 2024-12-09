@@ -1,13 +1,18 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Formik } from 'formik';
 import { SignUpSchema } from '../yupSchemas/SignUpSchema';
 import { InputField, CustomsButton } from '../components/index';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/types';
 
 const SignUpScreen: React.FC = () => {
+    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'SignUp'>>();
+
     const [passwordStrength, setPasswordStrength] = useState('No');
-    const navigation = useNavigation();
+    const [suggestedEmail, setSuggestedEmail] = useState('');
 
     const determinePasswordStrength = (password: string): string => {
         const length = password.length;
@@ -17,18 +22,35 @@ const SignUpScreen: React.FC = () => {
         return 'Strong';
     };
 
+    useEffect(() => {
+        const getSuggestedEmail = async () => {
+            const email = await AsyncStorage.getItem('userEmail');
+            if (email) {
+                setSuggestedEmail(email);
+            }
+        };
+        getSuggestedEmail();
+    }, []);
+
+    console.log("suggestedEmail---", suggestedEmail);
+
+    const handleSignUp = async (values: { fullName: string; email: string }) => {
+        await AsyncStorage.setItem('userEmail', values.email);
+        const userData = { name: values.fullName, isLogin: false };
+        navigation.navigate('Home', { user: userData });
+    };
+
     return (
         <Formik
             initialValues={{
                 fullName: '',
-                email: '',
+                email: suggestedEmail || "",
                 password: '',
                 confirmPassword: '',
             }}
+            enableReinitialize
             validationSchema={SignUpSchema}
-            onSubmit={(values) => {
-                alert('Sign Up Successful');
-            }}
+            onSubmit={handleSignUp}
         >
             {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
                 <View style={styles.container}>
@@ -86,6 +108,8 @@ const SignUpScreen: React.FC = () => {
     );
 };
 
+export default SignUpScreen;
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -121,4 +145,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default SignUpScreen;
+
